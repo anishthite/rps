@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How the RPS AI works</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2315120d'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-size='11' fill='%23fbf6ea' font-family='Arial'%3ERPS%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="paper-page" data-page="explain">
+  <header class="paper-nav">
+    <a href="index.html">Play</a>
+    <a aria-current="page" href="explain.html">How it works</a>
+  </header>
+
+  <main class="paper-shell">
+    <article class="paper-article">
+      <h1>How the opponent reads you</h1>
+      <p class="lede">
+        Rock paper scissors is solved if both players throw each move with equal probability. The hard part is that
+        people usually leave small traces: repeating after a win, correcting after a loss, or cycling away from a move
+        they have used too often.
+      </p>
+
+      <section class="paper-grid" aria-labelledby="model-heading">
+        <div class="paper-diagram" aria-label="Live model diagram">
+          <svg id="explainChart" viewBox="0 0 520 340" role="img" aria-labelledby="chartTitle chartDesc">
+            <title id="chartTitle">Weighted predictors diagram</title>
+            <desc id="chartDesc">Bars show how strongly the opponent predicts rock, paper, and scissors.</desc>
+            <line x1="80" y1="280" x2="470" y2="280"></line>
+            <g class="chart-bars">
+              <rect id="explainRock" x="116" y="168" width="64" height="112"></rect>
+              <rect id="explainPaper" x="228" y="168" width="64" height="112"></rect>
+              <rect id="explainScissors" x="340" y="168" width="64" height="112"></rect>
+            </g>
+            <g class="chart-labels">
+              <text x="148" y="306">rock</text>
+              <text x="260" y="306">paper</text>
+              <text x="372" y="306">scissors</text>
+              <text id="chartCallout" x="80" y="58">balanced play gives no target</text>
+            </g>
+            <path id="counterArrow" d="M178 150 C232 108 276 108 338 150"></path>
+            <text id="counterLabel" x="258" y="94">counter the likely throw</text>
+          </svg>
+          <label class="paper-control">
+            Pattern strength
+            <input id="patternSlider" type="range" min="0" max="100" value="64">
+          </label>
+        </div>
+
+        <div>
+          <h2 id="model-heading">The model is an ensemble, not a mind reader</h2>
+          <p>
+            Every round starts by asking several small predictors what your next throw might be. One predictor counts
+            your whole history. Another values recent throws more. Two Markov predictors ask what usually follows your
+            last one or two throws. A response predictor watches what you do after wins, losses, and ties.
+          </p>
+          <p>
+            Each predictor produces a distribution over the three moves. The AI combines them with this scoring rule:
+          </p>
+
+          <p class="equation" aria-label="Weighted probability equation">
+            <button class="term" data-term="probability">P(m)</button>
+            =
+            <span class="fraction">
+              <span>
+                <button class="term" data-term="weight">sum w_i</button>
+                <button class="term" data-term="model">p_i(m)</button>
+              </span>
+              <span>
+                <button class="term" data-term="normalizer">sum w_i</button>
+              </span>
+            </span>
+          </p>
+
+          <p>
+            The strongest move in that distribution is treated as your likely throw. The AI then plays the move that
+            beats it. Its weight update is intentionally simple: a predictor that called recent rounds correctly earns
+            more influence; a predictor that missed fades.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Why it is hard</h2>
+        <p>
+          Many human players are close to random in the first few rounds, then slip into conditional responses. In a
+          large experimental study, players showed cycling and conditional patterns related to outcomes, including
+          win-stay and lose-shift behavior
+          <a class="citation" href="https://www.nature.com/articles/srep05830" title="Scientific Reports study of social cycling and conditional responses in RPS.">[1]</a>.
+          The app exploits that kind of leakage, but only after it appears in your own match history.
+        </p>
+        <p>
+          If your sequence stays near the mixed-strategy equilibrium, the model has little to use. Randomizing equally
+          across rock, paper, and scissors makes every pure counter equally risky
+          <a class="citation" href="https://arxiv.org/abs/1903.05991" title="Review-style introduction to RPS, Nash equilibrium, and conditional response dynamics.">[2]</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Why it is fair</h2>
+        <p>
+          The click handler asks the AI for its throw before the current human throw is scored. The AI cannot peek at
+          the button you just pressed. It can only punish patterns already visible in completed rounds.
+        </p>
+        <ol class="paper-steps">
+          <li>Read completed rounds.</li>
+          <li>Predict the next human throw.</li>
+          <li>Lock the AI throw.</li>
+          <li>Reveal and score both throws.</li>
+          <li>Update predictor accuracy for the next round.</li>
+        </ol>
+      </section>
+
+      <section class="glossary" aria-labelledby="glossary-heading">
+        <h2 id="glossary-heading">Glossary</h2>
+        <dl>
+          <dt id="gloss-probability">P(m)</dt>
+          <dd>The final probability assigned to move <em>m</em>, where <em>m</em> is rock, paper, or scissors.</dd>
+          <dt id="gloss-weight">w_i</dt>
+          <dd>The influence of predictor <em>i</em>, raised when that predictor has been accurate.</dd>
+          <dt id="gloss-model">p_i(m)</dt>
+          <dd>The probability that predictor <em>i</em> assigns to move <em>m</em>.</dd>
+          <dt id="gloss-normalizer">sum w_i</dt>
+          <dd>The total influence across active predictors, used to keep probabilities adding to one.</dd>
+        </dl>
+      </section>
+
+      <section>
+        <h2>References</h2>
+        <ol class="references">
+          <li>
+            Wang, Z. et al. <a href="https://www.nature.com/articles/srep05830">Social cycling and conditional responses in the Rock-Paper-Scissors game</a>.
+            <em>Scientific Reports</em>, 2014.
+          </li>
+          <li>
+            Zhou, H.-J. <a href="https://arxiv.org/abs/1903.05991">The Rock-Paper-Scissors Game</a>.
+            arXiv, 2019.
+          </li>
+        </ol>
+      </section>
+    </article>
+
+    <aside class="definition-card" id="definitionCard" aria-live="polite">
+      <b id="definitionTitle">Tap an equation term</b>
+      <p id="definitionBody">Definitions appear here and link back to the glossary.</p>
+      <a id="definitionLink" href="#glossary-heading">Glossary</a>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

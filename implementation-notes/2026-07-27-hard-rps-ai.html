@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec — Hard RPS AI Playground</title>
+<meta name="task" content="Build and audit a hard but fair rock paper scissors AI with playable UI and separate explanation page">
+<meta name="date-started" content="2026-07-27">
+<meta name="date-updated" content="2026-07-27">
+<meta name="status" content="shipped">
+<meta name="blast-radius" content="low">
+<meta name="tags" content="frontend,game,explainer">
+<meta name="related" content="">
+<style>
+  body { font: 14px/1.45 -apple-system, system-ui, sans-serif; max-width: 880px; margin: 1.5rem auto; padding: 0 1rem; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 .25rem; }
+  h2 { font-size: 15px; margin: 1.4rem 0 .4rem; border-bottom: 1px solid #ddd; padding-bottom: .2rem; }
+  h3 { font-size: 13px; margin: 1rem 0 .3rem; color: #444; text-transform: uppercase; letter-spacing: .04em; }
+  table { border-collapse: collapse; width: 100%; margin: .4rem 0 .8rem; }
+  th, td { border: 1px solid #ddd; padding: 4px 8px; text-align: left; vertical-align: top; }
+  th { background: #f6f6f6; font-weight: 600; }
+  code, pre { font-family: ui-monospace, Menlo, monospace; }
+  code { background: #f1f1f1; padding: 1px 4px; border-radius: 3px; font-size: 12.5px; }
+  pre { background: #f6f6f6; padding: .55rem .7rem; border-radius: 4px; overflow-x: auto; font-size: 12.5px; line-height: 1.4; }
+  ul, ol { margin: .3rem 0 .8rem 1.2rem; padding: 0; }
+  li { margin: .15rem 0; }
+  .blast-low { color: #2a7a2a; }
+  .meta { color: #555; font-size: 12.5px; margin-bottom: .8rem; }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 2px 14px; font-size: 13px; margin: .4rem 0 1rem; }
+  .kv b { color: #444; font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>Hard RPS AI Playground</h1>
+<p class="meta">
+  <code>hard-rps-ai-playground</code> · worktree <code>/Users/anishthite/conductor/workspaces/rps/santo-domingo</code> · 2026-07-27 · status <b>shipped</b> · blast <span class="blast-low">low</span>
+</p>
+
+<h2>Summary</h2>
+<div class="kv">
+  <b>Goal</b><div>Ship a static first-to-7 RPS opponent and a separate technical explainer.</div>
+  <b>Source</b><div>Local browser state only; AI reads completed round history.</div>
+  <b>Surface</b><div><code>/index.html</code>, <code>/explain.html</code>, <code>/app.js</code>, <code>/styles.css</code>.</div>
+  <b>Schema</b><div>None.</div>
+  <b>Mobile</b><div>Single-column match controls; explanation diagram stacks above prose.</div>
+  <b>Open Qs</b><div>0.</div>
+</div>
+
+<h2>Algorithm</h2>
+<ol>
+  <li>Score predictors from only prior rounds: global frequency, recency-weighted frequency, first-order Markov, second-order Markov, outcome response, and anti-repeat traps.</li>
+  <li>Convert the strongest predicted human move into the AI move with <code>counter(predictedMove)</code>.</li>
+  <li>Inject small seeded exploration when confidence is low or when the player appears uniformly random.</li>
+  <li>Show confidence, model weights, and next-move probabilities after each round.</li>
+</ol>
+
+<h2>UI layout</h2>
+<ol>
+  <li><b>Game table</b>: first-to-7 match, three large fixed-size throw buttons, score strip, pressure panel, and conditional round log.</li>
+  <li><b>Explainer</b>: paper-style prose, live probability diagram, equation terms with click definitions, and references.</li>
+</ol>
+
+<h2>Files</h2>
+<table>
+  <tr><th>Path</th><th>Kind</th><th>Delta</th></tr>
+  <tr><td><code>index.html</code></td><td>touch</td><td>Replace explainer-heavy game copy with first-to-7 match UI.</td></tr>
+  <tr><td><code>explain.html</code></td><td>new</td><td>Technical explainer page shell.</td></tr>
+  <tr><td><code>styles.css</code></td><td>touch</td><td>Replace probability dashboard styles with match HUD styles.</td></tr>
+  <tr><td><code>app.js</code></td><td>touch</td><td>Add first-to-7 state, streaks, pressure, match end, conditional trace, and delayed reveal.</td></tr>
+  <tr><td><code>README.md</code></td><td>new</td><td>Run instructions and behavior summary.</td></tr>
+  <tr><td><code>.gitignore</code></td><td>new</td><td>Ignore local Playwright scratch artifacts.</td></tr>
+</table>
+
+<h2>Decisions</h2>
+<table>
+  <tr><th>ID</th><th>Choice · Rationale</th></tr>
+  <tr><td>D-001</td><td>Use static HTML/CSS/JS. Empty repo needs no framework or build step.</td></tr>
+  <tr><td>D-002</td><td>Make the AI predictive, not omniscient. Fairness depends on reading only completed rounds.</td></tr>
+  <tr><td>D-003</td><td>Expose model diagnostics in the game UI. Tough opponents feel fairer when the player can audit the signal.</td></tr>
+  <tr><td>D-004</td><td>Move detailed diagnostics out of the play surface. The explainer page already carries probability and model mechanics.</td></tr>
+  <tr><td>D-005</td><td>Use first-to-7 as the core loop. A race creates stakes without adding rule complexity.</td></tr>
+  <tr><td>D-006</td><td>Show only player and AI in the score strip. The target already appears in the match chip.</td></tr>
+  <tr><td>D-007</td><td>Lock the AI move before a short reveal delay. Suspense must not let the AI inspect the clicked move after choosing.</td></tr>
+</table>
+
+<h2>Tradeoffs</h2>
+<table>
+  <tr><th>ID</th><th>Picked over Rejected · Reason</th></tr>
+  <tr><td>T-001</td><td><code>ensemble heuristics</code> over <code>trained model</code>. Browser-only play needs deterministic, inspectable behavior.</td></tr>
+  <tr><td>T-002</td><td><code>paper explainer page</code> over <code>modal help</code>. The user asked for a separate explanation page.</td></tr>
+  <tr><td>T-003</td><td><code>pressure HUD</code> over <code>probability bars</code>. The play page should feel like a match, not a model debugger.</td></tr>
+</table>
+
+<h2>Assumptions</h2>
+<ul>
+  <li>A-001 · Static hosting is acceptable. If wrong: add framework wiring later.</li>
+  <li>A-002 · The target game is classic three-throw RPS. If wrong: widen move graph and payoff matrix.</li>
+</ul>
+
+<h2>Reversibility</h2>
+<p>R-001 · <span class="blast-low">low</span>. Delete the new static files and implementation note.</p>
+
+<h2>Definition of done</h2>
+<ul>
+  <li>Game is playable without a build step.</li>
+  <li>AI has no access to the current human throw before choosing.</li>
+  <li>Explainer page shows mechanics, terms, references, and a live control.</li>
+  <li>Desktop and mobile smoke checks pass.</li>
+  <li>Browser assertions report no console errors and no <code>390px</code> horizontal overflow.</li>
+  <li>Design audit removes dead initial trace, random throw button, hero explanation copy, and play-page probability bars.</li>
+  <li>Clicking a throw shows a short thinking animation before score and AI move reveal.</li>
+</ul>
+
+</body>
+</html>
