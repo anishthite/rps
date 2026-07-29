@@ -270,6 +270,22 @@
       reset: document.getElementById("resetGame")
     };
 
+    const resultTones = ["is-win", "is-loss", "is-tie"];
+
+    function setResultTone(tone) {
+      els.resultText.classList.remove(...resultTones);
+      if (tone) els.resultText.classList.add(`is-${tone}`);
+    }
+
+    function clearPickedThrow() {
+      els.buttons.forEach((button) => button.classList.remove("is-picked"));
+    }
+
+    function celebrateMatchWin() {
+      document.body.classList.add("is-celebrating");
+      window.setTimeout(() => document.body.classList.remove("is-celebrating"), 1400);
+    }
+
     function updateStats(plan, humanMove) {
       plan.predictors.forEach((predictor) => {
         if (!state.modelStats[predictor.name]) {
@@ -308,7 +324,10 @@
       els.matchState.textContent = state.over
         ? state.score.human >= target ? "You win" : "AI wins"
         : state.score.human === target - 1 || state.score.ai === target - 1 ? "Match point" : "Race to 7";
-      els.matchState.className = `match-chip ${state.over ? "is-over" : ""}`;
+      const matchTone = state.over
+        ? state.score.human >= target ? "is-over is-human-win" : "is-over"
+        : "";
+      els.matchState.className = `match-chip ${matchTone}`;
       els.pressureLabel.textContent = pressureText(diff);
       els.pressureValue.textContent = diff > 0 ? `+${diff}` : String(diff);
       els.pressureMeter.value = diff;
@@ -338,6 +357,10 @@
       const aiMove = plan.ai;
       const result = winner(humanMove, aiMove);
 
+      clearPickedThrow();
+      setResultTone(null);
+      document.body.classList.remove("is-celebrating");
+      els.buttons.find((button) => button.dataset.move === humanMove)?.classList.add("is-picked");
       els.playerThrow.textContent = `You: ${display[humanMove]}`;
       els.aiThrow.textContent = "AI: ...";
       els.resultText.textContent = "Reading...";
@@ -355,10 +378,13 @@
 
         els.aiThrow.textContent = `AI: ${display[aiMove]}`;
         els.resultText.classList.remove("is-thinking");
+        setResultTone(result === "human" ? "win" : result === "ai" ? "loss" : "tie");
         els.resultText.textContent = state.over
           ? state.score.human >= target ? "Match yours." : "Match lost."
-          : result === "human" ? "Point." : result === "ai" ? "AI point." : "Tie.";
+          : result === "human" ? "Point won." : result === "ai" ? "AI scores." : "Tie.";
+        if (state.over && state.score.human >= target) celebrateMatchWin();
         render(plan);
+        window.setTimeout(clearPickedThrow, 180);
       }, 720);
     }
 
@@ -376,6 +402,9 @@
       els.aiThrow.textContent = "AI: -";
       els.resultText.textContent = "Choose.";
       els.resultText.classList.remove("is-thinking");
+      setResultTone(null);
+      clearPickedThrow();
+      document.body.classList.remove("is-celebrating");
       render(null);
     });
 

@@ -10,4 +10,6 @@ python3 -m http.server 4173
 
 Then open `http://localhost:4173/`.
 
+Deploy: GitHub Pages serves `main` from `/`; `_config.yml` keeps implementation notes out of the published site.
+
 The AI locks its move before scoring your current click. It only uses completed round history, combining frequency, recency, Markov, outcome-response, anti-repeat, and revenge-read predictors.

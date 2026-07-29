@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec — Deploy Hide Notes and Game Polish</title>
+<meta name="task" content="Hide implementation notes from Pages and add match feedback polish">
+<meta name="date-started" content="2026-07-29">
+<meta name="date-updated" content="2026-07-29">
+<meta name="status" content="shipped">
+<meta name="blast-radius" content="low">
+<meta name="tags" content="deploy,frontend,game">
+<meta name="related" content="2026-07-27-hard-rps-ai.html">
+<style>
+  body { font: 14px/1.45 -apple-system, system-ui, sans-serif; max-width: 880px; margin: 1.5rem auto; padding: 0 1rem; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 .25rem; }
+  h2 { font-size: 15px; margin: 1.4rem 0 .4rem; border-bottom: 1px solid #ddd; padding-bottom: .2rem; }
+  table { border-collapse: collapse; width: 100%; margin: .4rem 0 .8rem; }
+  th, td { border: 1px solid #ddd; padding: 4px 8px; text-align: left; vertical-align: top; }
+  th { background: #f6f6f6; font-weight: 600; }
+  code, pre { font-family: ui-monospace, Menlo, monospace; }
+  code { background: #f1f1f1; padding: 1px 4px; border-radius: 3px; font-size: 12.5px; }
+  ul, ol { margin: .3rem 0 .8rem 1.2rem; padding: 0; }
+  li { margin: .15rem 0; }
+  .blast-low { color: #2a7a2a; }
+  .meta { color: #555; font-size: 12.5px; margin-bottom: .8rem; }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 2px 14px; font-size: 13px; margin: .4rem 0 1rem; }
+  .kv b { color: #444; font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>Deploy Hide Notes and Game Polish</h1>
+<p class="meta"><code>main</code> · worktree <code>/Users/anishthite/workspace/rps/rps</code> · 2026-07-29 · status <b>shipped</b> · blast <span class="blast-low">low</span></p>
+
+<h2>Summary</h2>
+<div class="kv">
+  <b>Goal</b><div>Publish only the game while adding visible throw, result, and human-match-win feedback.</div>
+  <b>Source</b><div>Existing static files and GitHub Pages legacy branch build.</div>
+  <b>Surface</b><div><code>/rps/</code>, <code>index.html</code>, <code>app.js</code>, <code>styles.css</code>.</div>
+  <b>Schema</b><div>None.</div>
+  <b>Mobile</b><div>Existing responsive layout keeps one-column controls.</div>
+  <b>Open Qs</b><div>0.</div>
+</div>
+
+<h2>UI layout</h2>
+<ol>
+  <li><b>Throw buttons</b>: selected throw pops during the locked-read delay.</li>
+  <li><b>Result chip</b>: win, loss, and tie states use distinct color fills.</li>
+  <li><b>Match win</b>: human match win toggles page-level confetti once.</li>
+</ol>
+
+<h2>Files</h2>
+<table>
+  <tr><th>Path</th><th>Kind</th><th>Delta</th></tr>
+  <tr><td><code>_config.yml</code></td><td>new</td><td>Exclude <code>implementation-notes/</code> from GitHub Pages output.</td></tr>
+  <tr><td><code>app.js</code></td><td>touch</td><td>Toggle selected-throw, result-tone, and match-win celebration classes.</td></tr>
+  <tr><td><code>styles.css</code></td><td>touch</td><td>Add throw pop, result tone, match chip, and CSS confetti styles.</td></tr>
+  <tr><td><code>README.md</code></td><td>touch</td><td>Document the Pages exclusion.</td></tr>
+  <tr><td><code>implementation-notes/INDEX.html</code></td><td>touch</td><td>Index this task.</td></tr>
+</table>
+
+<h2>Decisions</h2>
+<table>
+  <tr><th>ID</th><th>Choice · Rationale</th></tr>
+  <tr><td>D-001</td><td>Use <code>_config.yml</code> exclusions. GitHub Pages already runs a legacy branch build.</td></tr>
+  <tr><td>D-002</td><td>Use body and element classes for feedback. Existing DOM already has the required surfaces.</td></tr>
+</table>
+
+<h2>Tradeoffs</h2>
+<table>
+  <tr><th>ID</th><th>Picked over Rejected · Reason</th></tr>
+  <tr><td>T-001</td><td><code>_config.yml</code> over <code>docs/</code> move or Actions workflow. One file hides notes without duplicating site files.</td></tr>
+  <tr><td>T-002</td><td>CSS confetti over a canvas or library. Match-win feedback needs no runtime asset pipeline.</td></tr>
+</table>
+
+<h2>Assumptions</h2>
+<ul>
+  <li>A-001 · GitHub Pages honors <code>exclude</code> in legacy branch builds. If wrong: switch source to <code>/docs</code>.</li>
+</ul>
+
+<h2>Reversibility</h2>
+<p>R-001 · <span class="blast-low">low</span>. Revert <code>_config.yml</code>, class toggles, and CSS blocks; Pages rebuild restores the previous site.</p>
+
+<h2>Definition of done</h2>
+<ul>
+  <li><code>node --check app.js</code> passes.</li>
+  <li>Local static smoke returns <code>200</code> for game assets.</li>
+  <li>GitHub Pages returns <code>404</code> for <code>/implementation-notes/INDEX.html</code>.</li>
+  <li>Live game still returns <code>200</code>.</li>
+</ul>
+
+</body>
+</html>

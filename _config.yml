@@ -1,0 +1,4 @@
+exclude:
+  - implementation-notes
+  - output
+  - .playwright-cli
