@@ -76,7 +76,6 @@ button {
   aspect-ratio: 1;
   color: var(--cream);
   background: var(--ink);
-  border: 2px solid var(--ink);
   font-size: 13px;
 }
 
@@ -148,7 +147,6 @@ p {
   min-width: 116px;
   min-height: 44px;
   padding: 0 14px;
-  border: 2px solid var(--ink);
   border-radius: 8px;
   background: var(--gold);
   font-size: 13px;
@@ -168,7 +166,6 @@ p {
 .score-strip {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  border: 2px solid var(--ink);
   margin: 30px 0;
 }
 
@@ -423,7 +420,11 @@ meter {
   justify-content: space-between;
   gap: 14px;
   padding: 12px 0;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 1px solid rgba(47, 42, 35, 0.16);
+}
+
+.match-stats div:last-child {
+  border-bottom: 0;
 }
 
 .match-stats dt {
@@ -442,8 +443,7 @@ meter {
 .read-card {
   margin: 0 0 20px;
   padding: 16px;
-  border: 2px solid var(--ink);
-  background: var(--paper);
+  background: var(--paper-deep);
 }
 
 .read-card span {
@@ -475,7 +475,6 @@ meter {
 .icon-button,
 .text-button {
   min-height: 42px;
-  border: 2px solid var(--ink);
   background: var(--ink);
   color: var(--cream);
   border-radius: 8px;
@@ -524,7 +523,6 @@ meter {
 .round-log li {
   min-height: 74px;
   padding: 12px;
-  border: 2px solid var(--ink);
   background: var(--paper);
 }
 
