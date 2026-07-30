@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Spec — Reduce Border Count on Game Page</title>
+<meta name="task" content="Cut redundant borders on the game page for a calmer look">
+<meta name="date-started" content="2026-07-30">
+<meta name="date-updated" content="2026-07-30">
+<meta name="status" content="shipped">
+<meta name="blast-radius" content="low">
+<meta name="tags" content="frontend,css,polish">
+<meta name="related" content="2026-07-29-deploy-polish.html">
+<style>
+  body { font: 14px/1.45 -apple-system, system-ui, sans-serif; max-width: 880px; margin: 1.5rem auto; padding: 0 1rem; color: #111; }
+  h1 { font-size: 20px; margin: 0 0 .25rem; }
+  h2 { font-size: 15px; margin: 1.4rem 0 .4rem; border-bottom: 1px solid #ddd; padding-bottom: .2rem; }
+  table { border-collapse: collapse; width: 100%; margin: .4rem 0 .8rem; }
+  th, td { border: 1px solid #ddd; padding: 4px 8px; text-align: left; vertical-align: top; }
+  th { background: #f6f6f6; font-weight: 600; }
+  code, pre { font-family: ui-monospace, Menlo, monospace; }
+  code { background: #f1f1f1; padding: 1px 4px; border-radius: 3px; font-size: 12.5px; }
+  ul, ol { margin: .3rem 0 .8rem 1.2rem; padding: 0; }
+  li { margin: .15rem 0; }
+  .blast-low { color: #2a7a2a; }
+  .meta { color: #555; font-size: 12.5px; margin-bottom: .8rem; }
+  .kv { display: grid; grid-template-columns: 140px 1fr; gap: 2px 14px; font-size: 13px; margin: .4rem 0 1rem; }
+  .kv b { color: #444; font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>Reduce Border Count on Game Page</h1>
+<p class="meta"><code>reduce-borders</code> · 2026-07-30 · status <b>shipped</b> · blast <span class="blast-low">low</span></p>
+
+<h2>Summary</h2>
+<div class="kv">
+  <b>Goal</b><div>Fewer borders on the game page — the heavy 2px outlines were on too many nested elements.</div>
+  <b>Approach</b><div>Keep the signature bold borders on primary structure; drop redundant, invisible, and nested ones. Separate by fill/space instead of lines.</div>
+  <b>Surface</b><div><code>styles.css</code> only. No HTML or JS change.</div>
+  <b>Schema</b><div>None.</div>
+  <b>Open Qs</b><div>0.</div>
+</div>
+
+<h2>Removed / softened</h2>
+<table>
+  <tr><th>Selector</th><th>Change · Reason</th></tr>
+  <tr><td><code>.mark</code></td><td>Removed border. It was <code>--ink</code> on an <code>--ink</code> fill — invisible.</td></tr>
+  <tr><td><code>.icon-button, .text-button</code></td><td>Removed border. Same <code>--ink</code>-on-<code>--ink</code> invisible border.</td></tr>
+  <tr><td><code>.match-chip</code></td><td>Removed border. Gold/red/green fill already defines the pill.</td></tr>
+  <tr><td><code>.score-strip</code></td><td>Removed outer box border; kept the center divider so You/AI stay split.</td></tr>
+  <tr><td><code>.read-card</code></td><td>Removed border; switched fill to <code>--paper-deep</code> so it reads as an inset block, not a boxed one.</td></tr>
+  <tr><td><code>.round-log li</code></td><td>Removed border. Every tile gets a human/ai/tie color class, so fills separate them.</td></tr>
+  <tr><td><code>.match-stats div</code></td><td>Softened 2px black rule to a hairline; dropped it on the last row.</td></tr>
+</table>
+
+<h2>Kept (signature borders)</h2>
+<ul>
+  <li><code>.topbar</code> bottom rule; <code>.nav-links a</code> active underline.</li>
+  <li><code>.arena, .match-panel, .history-band</code> panel outlines.</li>
+  <li><code>.throw-button</code> outlines (core brutalist button look).</li>
+  <li><code>.result-line</code> top divider.</li>
+</ul>
+
+<h2>Decisions</h2>
+<table>
+  <tr><th>ID</th><th>Choice · Rationale</th></tr>
+  <tr><td>D-001</td><td>Reduce border <i>count</i>, not thickness. First pass thinned 2px&rarr;1px; user clarified the issue was quantity, so that was reverted.</td></tr>
+  <tr><td>D-002</td><td>Define nested elements by background tone/spacing instead of outlines.</td></tr>
+</table>
+
+<h2>Reversibility</h2>
+<p>R-001 · <span class="blast-low">low</span>. Single-file CSS diff; revert restores every removed border.</p>
+
+<h2>Definition of done</h2>
+<ul>
+  <li>Only the 6 intended bold borders remain in <code>styles.css</code>.</li>
+  <li>Read-card, chip, scoreboard, and round tiles still read as distinct blocks.</li>
+  <li>No HTML/JS change; game still plays.</li>
+</ul>
+
+</body>
+</html>
